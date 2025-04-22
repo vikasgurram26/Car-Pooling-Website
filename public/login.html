@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideShare - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo">
+                    <i class="fa-solid fa-car-side logo-icon"></i>
+                    Ride<span>Share</span>
+                </a>
+                <div class="nav-links">
+                    <a href="index.html#how-it-works">How It Works</a>
+                    <a href="index.html#features">Features</a>
+                    <a href="index.html#trips">Find Trips</a>
+                    <a href="index.html#about">About Us</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="login-container">
+                <div class="login-form-container">
+                    <div class="login-form-header">
+                        <h2>Welcome Back</h2>
+                        <p>Sign in to your RideShare account</p>
+                    </div>
+                    
+                    <form class="login-form" id="loginForm">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required>
+                            <div class="error-message">Please enter a valid email address</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                            <div class="error-message">Please enter your password</div>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="rememberMe" name="rememberMe">
+                            <label for="rememberMe">Remember me</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+                        
+                        <div class="social-login">
+                            <p>Or sign in with</p>
+                            <div class="social-buttons">
+                                <button type="button" class="social-btn" id="googleLogin">
+                                    <i class="fab fa-google"></i> Google
+                                </button>
+                                <button type="button" class="social-btn" id="facebookLogin">
+                                    <i class="fab fa-facebook-f"></i> Facebook
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-links">
+                            <a href="#" id="forgotPassword">Forgot password?</a>
+                            <div class="signup-link">
+                                Don't have an account? <a href="signup.html">Sign up</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        let isValid = true;
+
+        // Validate email
+        const email = document.getElementById('email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.value)) {
+            email.parentElement.classList.add('has-error');
+            isValid = false;
+        } else {
+            email.parentElement.classList.remove('has-error');
+        }
+
+        // Validate password
+        const password = document.getElementById('password');
+        if (!password.value) {
+            password.parentElement.classList.add('has-error');
+            isValid = false;
+        } else {
+            password.parentElement.classList.remove('has-error');
+        }
+
+        if (isValid) {
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email.value,
+                        password: password.value
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    // Store firstName, lastName, and userType in local storage
+                    localStorage.setItem('firstName', data.firstName);
+                    localStorage.setItem('lastName', data.lastName);
+                    localStorage.setItem('userType', data.userType); // Store user type
+
+                    // Redirect to the main page
+                    window.location.href = '/';
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during login');
+            }
+        }
+    });
+});</script>
+</body>
+</html>

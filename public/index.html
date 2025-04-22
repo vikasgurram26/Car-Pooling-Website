@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideShare - Connect & Carpool</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .user-type {
+            font-size: 0.9rem;
+            color: gray;
+            display: block; /* Ensures it appears on a new line */
+            margin-top: 5px;
+        }
+
+        #navPostTripBtn {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <i class="fa-solid fa-car-side logo-icon"></i>
+                    Ride<span>Share</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#features">Features</a>
+                    <a href="#trips">Find Trips</a>
+                    <a href="#about">About Us</a>
+              
+                </div>
+                <div class="auth-buttons">
+                    <a href="/login" class="btn btn-outline" id="loginBtn">Log In</a>
+                    <a href="/signup" class="btn btn-primary" id="signupBtn">Sign Up</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="animated-bg">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1>Share Your Ride, Save the Planet</h1>
+                <p>Connect with drivers and riders going your way. Save money, reduce emissions, and make new friends along the way.</p>
+                <button class="btn btn-primary" id="offerRideBtn">Offer a Ride</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Ride Form -->
+    <div class="container">
+        <div class="search-ride">
+            <form class="search-form">
+                <div class="form-group">
+                    <label for="departure">From</label>
+                    <input type="text" id="departure" placeholder="Enter departure city">
+                </div>
+                <div class="form-group">
+                    <label for="destination">To</label>
+                    <input type="text" id="destination" placeholder="Enter destination city">
+                </div>
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date">
+                </div>
+                <div class="search-btn">
+                    <button type="button" class="btn btn-primary" id="searchBtn">Find Rides</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Available Trips Section -->
+    <section class="available-trips" id="trips">
+        <div class="container">
+            <div class="section-header">
+                <h2>Available Rides</h2>
+                <p>Check out these upcoming trips from drivers in your area</p>
+            </div>
+            <div class="trips-grid">
+                <!-- Trip cards will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Post a Trip Modal -->
+    <div class="modal" id="postTripModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2>Post a Trip</h2>
+            <form id="postTripForm">
+                <div class="form-group">
+                    <label for="postDeparture">From</label>
+                    <input type="text" id="postDeparture" name="departure" placeholder="Enter departure city" required>
+                </div>
+                <div class="form-group">
+                    <label for="postDestination">To</label>
+                    <input type="text" id="postDestination" name="destination" placeholder="Enter destination city" required>
+                </div>
+                <div class="form-group">
+                    <label for="postDate">Date</label>
+                    <input type="date" id="postDate" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="postTime">Time</label>
+                    <input type="time" id="postTime" name="time" required>
+                </div>
+                <div class="form-group">
+                    <label for="postPrice">Price</label>
+                    <input type="number" id="postPrice" name="price" placeholder="Enter price" required>
+                </div>
+                <div class="form-group">
+                    <label for="postSeats">Available Seats</label>
+                    <input type="number" id="postSeats" name="seats" placeholder="Enter number of seats" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Post Trip</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Ticket Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeConfirmationModal">&times;</span>
+            <h2>Booking Confirmation</h2>
+            <div class="ticket-details">
+                <p><strong>From:</strong> <span id="ticketDeparture"></span></p>
+                <p><strong>To:</strong> <span id="ticketDestination"></span></p>
+                <p><strong>Date:</strong> <span id="ticketDate"></span></p>
+                <p><strong>Time:</strong> <span id="ticketTime"></span></p>
+                <p><strong>Price:</strong> Rs. <span id="ticketPrice"></span></p>
+            </div>
+            <button class="btn btn-primary" id="closeTicketBtn">Close</button>
+        </div>
+    </div>
+
+    <!-- Button to Open the Modal -->
+  
+
+    <script>
+        document.getElementById('signupBtn').addEventListener('click', () => {
+            window.location.href = '/signup';
+        });
+    </script>
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            window.location.href = '/login';
+        });
+    </script>
+    <script>
+        // Check if the user is logged in
+        const firstName = localStorage.getItem('firstName');
+        const lastName = localStorage.getItem('lastName');
+        const userType = localStorage.getItem('userType'); // Retrieve user type
+
+        console.log('User Info:', { firstName, lastName, userType }); // Debugging
+
+        if (firstName && lastName && userType) {
+            const authButtons = document.querySelector('.auth-buttons');
+            authButtons.innerHTML = `
+                <div>
+                    <span>Welcome, ${firstName} ${lastName}</span>
+                    <br>
+                    <span class="user-type">${userType}</span> <!-- Display user type below -->
+                </div>
+                <button class="btn btn-outline" id="logoutBtn">Logout</button>
+            `;
+
+            // If the user is a driver, show the "Post a Trip" button in the navbar
+            if (userType.toLowerCase() === 'driver') {
+                const navLinks = document.querySelector('.nav-links');
+                navLinks.innerHTML += `
+                    <button class="btn btn-primary" id="navPostTripBtn">Post a Trip</button>
+                `;
+
+                // Add event listener to open the "Post a Trip" modal
+                const navPostTripBtn = document.getElementById('navPostTripBtn');
+                navPostTripBtn.addEventListener('click', () => {
+                    const postTripModal = document.getElementById('postTripModal');
+                    postTripModal.style.display = 'block';
+                });
+            }
+
+            // Handle logout
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('firstName');
+                localStorage.removeItem('lastName');
+                localStorage.removeItem('userType'); // Remove user type
+                window.location.href = '/login';
+            });
+        }
+    </script>
+    <script>
+        // Open and close the modal
+        const postTripModal = document.getElementById('postTripModal');
+        const postTripBtn = document.getElementById('postTripBtn');
+        const closeModal = document.getElementById('closeModal');
+
+        postTripBtn.addEventListener('click', () => {
+            postTripModal.style.display = 'block';
+        });
+
+        closeModal.addEventListener('click', () => {
+            postTripModal.style.display = 'none';
+        });
+
+        // Open the "Post a Trip" modal from the navbar
+        const navPostTripBtn = document.getElementById('navPostTripBtn');
+        navPostTripBtn.addEventListener('click', () => {
+            postTripModal.style.display = 'block';
+        });
+
+        // Handle trip submission
+        const postTripForm = document.getElementById('postTripForm');
+        postTripForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const tripData = {
+                departure: document.getElementById('postDeparture').value.trim(),
+                destination: document.getElementById('postDestination').value.trim(),
+                date: document.getElementById('postDate').value,
+                time: document.getElementById('postTime').value,
+                price: document.getElementById('postPrice').value,
+                seats: document.getElementById('postSeats').value
+            };
+
+            // Log the trip data to ensure all fields are captured
+            console.log('Trip Data:', tripData);
+
+            // Check for missing fields
+            if (!tripData.departure || !tripData.destination || !tripData.date) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/trips', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(tripData)
+                });
+
+                if (response.ok) {
+                    alert('Trip posted successfully!');
+                    postTripModal.style.display = 'none';
+                    fetchTrips(); // Refresh the trips on the home page
+                } else {
+                    alert('Failed to post trip.');
+                }
+            } catch (error) {
+                console.error('Error posting trip:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+    <script>
+        async function fetchTrips() {
+            try {
+                const response = await fetch('/trips');
+                const trips = await response.json();
+
+                const tripsGrid = document.querySelector('.trips-grid');
+                tripsGrid.innerHTML = ''; // Clear existing trips
+
+                trips.forEach(trip => {
+                    const tripCard = document.createElement('div');
+                    tripCard.classList.add('trip-card');
+                    tripCard.innerHTML = `
+                        <div class="trip-header">
+                            <h3>${trip.date}, ${trip.time}</h3>
+                            <div class="trip-price">Rs: ${trip.price}</div>
+                        </div>
+                        <div class="trip-body">
+                            <div class="trip-info">
+                                <div class="trip-route">
+                                    <div class="route-point">
+                                        <div class="route-label">FROM</div>
+                                        <div class="route-value">${trip.departure}</div>
+                                    </div>
+                                    <div class="route-connection">
+                                        <i class="fa-solid fa-circle-dot"></i>
+                                        <div class="connection-line"></div>
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </div>
+                                    <div class="route-point">
+                                        <div class="route-label">TO</div>
+                                        <div class="route-value">${trip.destination}</div>
+                                    </div>
+                                </div>
+                                <div class="trip-detail">
+                                    <i class="fa-solid fa-chair"></i>
+                                    <span>${trip.seats} seats available</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary book-btn" data-trip-id="${trip._id}">Book Now</button>
+                        </div>
+                    `;
+                    tripsGrid.appendChild(tripCard);
+                });
+
+                // Add event listeners to all "Book Now" buttons
+                const bookButtons = document.querySelectorAll('.book-btn');
+                bookButtons.forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const tripId = event.target.getAttribute('data-trip-id');
+                        await bookTrip(tripId);
+                    });
+                });
+            } catch (error) {
+                console.error('Error fetching trips:', error);
+            }
+        }
+
+        async function bookTrip(tripId) {
+            try {
+                const response = await fetch(`/trips/book/${tripId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const trip = await response.json(); // Get the trip details from the response
+
+                    // Populate the confirmation modal with trip details
+                    document.getElementById('ticketDeparture').textContent = trip.trip.departure;
+                    document.getElementById('ticketDestination').textContent = trip.trip.destination;
+                    document.getElementById('ticketDate').textContent = trip.trip.date;
+                    document.getElementById('ticketTime').textContent = trip.trip.time;
+                    document.getElementById('ticketPrice').textContent = trip.trip.price;
+
+                    // Show the confirmation modal
+                    const confirmationModal = document.getElementById('confirmationModal');
+                    confirmationModal.style.display = 'block';
+
+                    // Refresh the trips to update available seats
+                    fetchTrips();
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message || 'Failed to book the trip.');
+                }
+            } catch (error) {
+                console.error('Error booking trip:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Close the confirmation modal
+        const closeConfirmationModal = document.getElementById('closeConfirmationModal');
+        const closeTicketBtn = document.getElementById('closeTicketBtn');
+
+        // Add event listener for the close icon (×)
+        closeConfirmationModal.addEventListener('click', () => {
+            const confirmationModal = document.getElementById('confirmationModal');
+            confirmationModal.style.display = 'none';
+        });
+
+        // Add event listener for the "Close" button
+        closeTicketBtn.addEventListener('click', () => {
+            const confirmationModal = document.getElementById('confirmationModal');
+            confirmationModal.style.display = 'none';
+        });
+
+        // Fetch trips on page load
+        document.addEventListener('DOMContentLoaded', fetchTrips);
+    </script>
+    <script>
+        document.getElementById('searchBtn').addEventListener('click', async () => {
+            const departure = document.getElementById('departure').value.trim();
+            const destination = document.getElementById('destination').value.trim();
+            const date = document.getElementById('date').value;
+
+            // Log the search criteria
+            console.log('Search Criteria:', { departure, destination, date });
+
+            try {
+                const response = await fetch(`/trips/search?departure=${departure}&destination=${destination}&date=${date}`);
+                const trips = await response.json();
+
+                const tripsGrid = document.querySelector('.trips-grid');
+                tripsGrid.innerHTML = ''; // Clear existing trips
+
+                if (trips.length === 0) {
+                    tripsGrid.innerHTML = '<p>No rides found matching your criteria.</p>';
+                    return;
+                }
+
+                trips.forEach(trip => {
+                    const tripCard = document.createElement('div');
+                    tripCard.classList.add('trip-card');
+                    tripCard.innerHTML = `
+                        <div class="trip-header">
+                            <h3>${trip.date}, ${trip.time}</h3>
+                            <div class="trip-price">Rs: ${trip.price}</div>
+                        </div>
+                        <div class="trip-body">
+                            <div class="trip-info">
+                                <div class="trip-route">
+                                    <div class="route-point">
+                                        <div class="route-label">FROM</div>
+                                        <div class="route-value">${trip.departure}</div>
+                                    </div>
+                                    <div class="route-connection">
+                                        <i class="fa-solid fa-circle-dot"></i>
+                                        <div class="connection-line"></div>
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </div>
+                                    <div class="route-point">
+                                        <div class="route-label">TO</div>
+                                        <div class="route-value">${trip.destination}</div>
+                                    </div>
+                                </div>
+                                <div class="trip-detail">
+                                    <i class="fa-solid fa-chair"></i>
+                                    <span>${trip.seats} seats available</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary book-btn" data-trip-id="${trip._id}">Book Now</button>
+                        </div>
+                    `;
+                    tripsGrid.appendChild(tripCard);
+                });
+
+                // Add event listeners to all "Book Now" buttons
+                const bookButtons = document.querySelectorAll('.book-btn');
+                bookButtons.forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const tripId = event.target.getAttribute('data-trip-id');
+                        await bookTrip(tripId);
+                    });
+                });
+            } catch (error) {
+                console.error('Error fetching trips:', error);
+            }
+        });
+    </script>
+</body>
+</html>
